@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 // import {generateAccessToken,generateRefreshToken} from '../utills/tokenGeneration.js'
 import jwt from "jsonwebtoken"
+import { sendEmailController } from "../services/email.js";
 export const generateAccessAndRefreshToken=async (userId)=>{
 
 try {
@@ -83,6 +84,9 @@ export const userRegisterController=async (req,res)=>{
             }
             res.cookie('accessToken', accessToken, options)
             res.cookie('refreshToken',refreshToken,options1)
+             
+            await sendEmailController(user)
+            
             res.status(201).json({
             user: {
                 _id: user._id,
@@ -91,9 +95,10 @@ export const userRegisterController=async (req,res)=>{
             },
             accessToken
         })
-    
+        
+        
     } catch (error) {
-        res.status(500).json({message :`Internal server Error while register ${error}`})
+       return  res.status(500).json({message :`Internal server Error while register ${error}`})
     }
 }
 export const userLoginController=async (req,res)=>{
