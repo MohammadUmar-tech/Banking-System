@@ -85,7 +85,9 @@ export const userRegisterController=async (req,res)=>{
             res.cookie('accessToken', accessToken, options)
             res.cookie('refreshToken',refreshToken,options1)
              
+            
             await sendEmailController(user)
+            
             
             res.status(201).json({
             user: {
@@ -95,8 +97,7 @@ export const userRegisterController=async (req,res)=>{
             },
             accessToken
         })
-        
-        
+
     } catch (error) {
        return  res.status(500).json({message :`Internal server Error while register ${error}`})
     }
