@@ -307,7 +307,7 @@
 
 import nodemailer from "nodemailer";
 
-export const sendEmailController = async (user, amount, fromAccount, toAccount) => {
+export const sendEmailController = async ({user, amount, fromAccount, toAccount}) => {
   try {
     console.log("PASS in function:", process.env.NODEMAILER_PASS ? "LOADED" : "UNDEFINED");
     console.log("User:", user.email);

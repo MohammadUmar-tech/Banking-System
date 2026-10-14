@@ -86,7 +86,7 @@ export const userRegisterController=async (req,res)=>{
             res.cookie('refreshToken',refreshToken,options1)
              
             
-            await sendEmailController(user)
+            await sendEmailController({user})
             
             
             res.status(201).json({
