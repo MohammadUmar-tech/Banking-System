@@ -4,6 +4,7 @@ import { ledgerModel } from "../models/ledger.model.js";
 import mongoose from "mongoose"
 
 import { sendEmailController } from "../services/email.js";
+import { resolve } from "nodemailer/lib/shared/url.js";
 
 
 export const createTransaction=async (req,res)=>{
@@ -82,13 +83,13 @@ export const createTransaction=async (req,res)=>{
     const session=await mongoose.startSession()
     session.startTransaction()
 
-    const transaction=new transactionModel({
+    const transaction=(await transactionModel.create([{
         fromAccount,
         toAccount,
         amount,
         idempotencyKey,
         status:"PENDING"
-    })
+    }],{session}))[0]
 
     const debitLedgerEntry=await ledgerModel.create([{
         account:fromAccount,
@@ -96,6 +97,11 @@ export const createTransaction=async (req,res)=>{
         transaction:transaction._id,
         type:"DEBIT"
     }],{session})
+
+    await(()=>{
+        return new Promise((resolve)=>setTimeout(resolve,15*1000))
+    })()
+
 
     const creditLedgerEntry=await ledgerModel.create([{
         account:toAccount,
@@ -105,7 +111,12 @@ export const createTransaction=async (req,res)=>{
     }],{session})
 
 
-    transaction.status="COMPLETED"
+    await transaction.findOneAndUpdate(
+            { _id: transaction._id },
+            { status: "COMPLETED" },
+            { session }
+        )
+
     await transaction.save({session})
 
     await session.commitTransaction()
