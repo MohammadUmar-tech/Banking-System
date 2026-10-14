@@ -2,6 +2,7 @@ import userModel from "../models/user.model.js";
 // import {generateAccessToken,generateRefreshToken} from '../utills/tokenGeneration.js'
 import jwt from "jsonwebtoken"
 import { sendEmailController } from "../services/email.js";
+import { blackListModel } from "../models/blacklist.model.js";
 export const generateAccessAndRefreshToken=async (userId)=>{
 
 try {
@@ -149,6 +150,8 @@ export const userLoginController=async (req,res)=>{
 }
 export const logOutController=async (req,res)=>{
     const user=await userModel.findById(req.user._id);
+    const token1=req.cookies?.accessToken
+    const token2=req.cookies?.refreshToken
     user.refreshToken=undefined;
     user.save({validateBeforeSave:false});
         const options1={
@@ -162,5 +165,7 @@ export const logOutController=async (req,res)=>{
          secure: false,
          sameSite: 'lax',
          }
+         await blackListModel.create({token:token1})
+         await blackListModel.create({token:token2})
     return res.clearCookie('refreshToken',options1).clearCookie('accessToken',options).status(200).json({message:"user Logged out successfully"})
 }

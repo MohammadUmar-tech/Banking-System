@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import userModel from "../models/user.model.js";
-import { refreshAccessAndRefreshToken } from "../controllers/user.controller.js";
+import { blackListModel } from "../models/blacklist.model.js";
 export const authenticationMiddleware = async (req, res, next) => {
   try {
     const token =
@@ -9,6 +9,12 @@ export const authenticationMiddleware = async (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({ message: "No token, unauthorized" });
+    }
+
+    const blacklistToken=await blackListModel.findOne({token});
+
+    if(blacklistToken){
+      return res.status(404).json({message:`token already exist Unathorized User`})
     }
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
     if (!decoded) {
@@ -43,7 +49,10 @@ export const systemUserMiddleware = async (req, res, next) => {
       message: "Unathorized Access",
     });
   }
-
+  const blacklistToken=await blackListModel.findOne({token});
+   if(blacklistToken){
+      return res.status(404).json({message:`token already exist Unathorized User`})
+    }
   try {
     const decoded = await jwt.verify(
       token,
