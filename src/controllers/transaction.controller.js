@@ -82,13 +82,13 @@ export const createTransaction=async (req,res)=>{
     const session=await mongoose.startSession()
     session.startTransaction()
 
-    const transaction=await transactionModel.create({
+    const transaction=new transactionModel({
         fromAccount,
         toAccount,
         amount,
         idempotencyKey,
         status:"PENDING"
-    },{session})
+    })
 
     const debitLedgerEntry=await ledgerModel.create([{
         account:fromAccount,
@@ -105,7 +105,7 @@ export const createTransaction=async (req,res)=>{
     }],{session})
 
 
-    transaction.status="COMPLETED",
+    transaction.status="COMPLETED"
     await transaction.save({session})
 
     await session.commitTransaction()

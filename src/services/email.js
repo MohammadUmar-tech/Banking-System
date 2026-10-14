@@ -391,6 +391,15 @@ export const sendEmailController = async ({user, amount, fromAccount, toAccount}
       });
     }
 
+      console.log("--- EMAIL DEBUG ---");
+      console.log("To:", user.email);
+      console.log("MessageId:", info.messageId);
+      console.log("Accepted:", info.accepted); // if empty = blocked
+      console.log("Rejected:", info.rejected);
+      console.log("Response:", info.response); // Gmail will say "250 2.0.0 OK"
+      console.log("-------------------");
+
+
     console.log("Email Sending Operation Ended")
     console.log(`Email sent: ${info.messageId}`);
     return info;

@@ -47,7 +47,7 @@ accountSchema.methods.getBalance=async function () {
                         ]
                     }
                 },
-                totalCredit:{
+                totalCredits:{
                     $sum:{
                         $cond:[
                             {$eq:["$type","CREDIT"]},
@@ -61,7 +61,7 @@ accountSchema.methods.getBalance=async function () {
         {
             $project:{
                 _id:0,
-                balance:{$subtract:["$totalCredit","$totalDebit"]}
+                balance:{$subtract:["$totalCredits","$totalDebits"]}
             }
         }
     ])
