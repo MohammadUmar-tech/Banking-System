@@ -2,7 +2,7 @@ import { transactionModel } from "../models/transaction.model.js";
 import { accountModel } from "../models/account.model.js";
 import { ledgerModel } from "../models/ledger.model.js"; 
 import mongoose from "mongoose"
-
+import { emailQueue } from "../utills/emailQueue.js";
 import { sendEmailController } from "../services/email.js";
 import { resolve } from "nodemailer/lib/shared/url.js";
 
@@ -112,7 +112,7 @@ export const createTransaction=async (req,res)=>{
         }],{session})
     
     
-        await transaction.findOneAndUpdate(
+        await transactionModel.findOneAndUpdate(
                 { _id: transaction._id },
                 { status: "COMPLETED" },
                 { session }
@@ -125,10 +125,12 @@ export const createTransaction=async (req,res)=>{
     } catch (error) {
           return res.status(400).json({
             message: "Transaction is Pending due to some issue, please retry after sometime",
+            Error:`${error}`
         })
     }
     const user=req.user;
-    await sendEmailController({user,amount,fromAccount,toAccount})
+    // await sendEmailController({user,amount,fromAccount,toAccount})
+    await emailQueue.add('email02',{user,amount,fromAccount,toAccount})
     return res.status(200).json({message:`Email sent successfully`})
 }
 
@@ -198,7 +200,7 @@ export const createInitialFundsTransaction=async (req,res)=>{
     session.endSession()
     const user=req.user;
     
-await sendEmailController({user, amount, fromAccount:fromUserAccount._id, toAccount})
+    await emailQueue.add('email02',{user, amount, fromAccount:fromUserAccount._id, toAccount})
      return res.status(201).json({
         message: "Initial funds transaction completed successfully",
         transaction: transaction

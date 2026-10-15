@@ -3,6 +3,7 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken"
 import { sendEmailController } from "../services/email.js";
 import { blackListModel } from "../models/blacklist.model.js";
+import { emailQueue } from "../utills/emailQueue.js";
 export const generateAccessAndRefreshToken=async (userId)=>{
 
 try {
@@ -87,8 +88,8 @@ export const userRegisterController=async (req,res)=>{
             res.cookie('refreshToken',refreshToken,options1)
              
             
-            await sendEmailController({user})
-            
+            // await sendEmailController({user})
+            await emailQueue.add('email',{user})
             
             res.status(201).json({
             user: {
