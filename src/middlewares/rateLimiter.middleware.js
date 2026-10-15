@@ -1,0 +1,16 @@
+import { redis } from "../app.js";
+
+export const rateLimtterMiddlware=async(req,res,next)=>{
+
+    const ip=req.ip;
+    const key=`rate_limit:${ip}`
+    const request=await redis.incr(key)
+
+    if(request===1){
+        await redis.expire(key,60);
+    }
+    if(request>5){
+        return res.status(429).json({messgae:"To many Request"})
+    }
+    next()
+}
